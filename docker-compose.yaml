@@ -6,6 +6,14 @@ services:
       - vtg
     expose:
       - "80"
+  vector-tile-cache:
+    image: memcached:latest
+    command: ["memcached", "-m", "2048", "-p", "11211", "-u", "memcache"]
+    restart: unless-stopped
+    networks:
+      - vtg
+    expose:
+      - "11211"
   vector-tile-server:
     build:
       context: .
