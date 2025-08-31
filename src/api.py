@@ -25,7 +25,7 @@ async def tile(zoom: int, x: int, y: int, style: str, width: int = 256, height: 
             'User-Agent': f"VectorTileProxy/{version.__version__}"
         }
 
-        cache = memcache.Client(['vector-tile-cache:11211'], debug=0)
+        cache: memcache.Client = memcache.Client(['vector-tile-cache:11211'], debug=0)
 
         cache_style_key = f"style:{style}"
         cache_tile_key = f"{cache_style_key}/tile:{zoom}:{x}:{y}:{width}:{height}"
@@ -35,27 +35,27 @@ async def tile(zoom: int, x: int, y: int, style: str, width: int = 256, height: 
         bbox_str: str = f"{bbox[0]},{bbox[1]},{bbox[2]},{bbox[3]}"
 
         # fetch desired style
-        style_response: any = cache.get(cache_style_key)
-        if style_response is None:
-            style_response = get(
+        style_data: any = cache.get(cache_style_key)
+        if style_data is None:
+            style_response: HttpResponse = get(
                 style, 
                 headers=http_headers
-            ).json()
+            )
 
             cache.set(
                 cache_style_key, 
-                json.dumps(style_response), 
+                style_response.content, 
                 time=600
             )
 
-            style_data = style_response
+            style_data = style_response.json()
         else:
-            style_data = json.loads(style_response)
+            style_data = json.loads(style_data)
 
         # combine all parameters and style to render everything by the
         # vector-tile-renderer
-        tile_response: any = cache.get(cache_tile_key)
-        if tile_response is None:
+        tile_data: any = cache.get(cache_tile_key)
+        if tile_data is None:
             tile_response: HttpResponse = post(
                 'http://vector-tile-renderer:80/render', 
                 json={
@@ -73,7 +73,8 @@ async def tile(zoom: int, x: int, y: int, style: str, width: int = 256, height: 
                 # set tile data and put into cache
                 cache.set(
                     cache_tile_key,
-                    tile_response.content
+                    tile_response.content,
+                    time=600
                 )
 
                 tile_data: bytes = tile_response.content
@@ -86,8 +87,6 @@ async def tile(zoom: int, x: int, y: int, style: str, width: int = 256, height: 
                         'error': tile_response.content.decode('utf-8')
                     }
                 )
-        else:
-            tile_data: bytes = tile_response
         
         # return rendered tile as PNG file
         return StreamingResponse(
