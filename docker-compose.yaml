@@ -25,5 +25,6 @@ services:
       - "8080:8080"
     depends_on:
       - vector-tile-renderer
+      - vector-tile-cache
 networks:
   vtg:
