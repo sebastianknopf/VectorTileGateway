@@ -1,0 +1,20 @@
+services:
+  vector-tile-renderer:
+    image: ghcr.io/consbio/mbgl-renderer:latest
+    restart: unless-stopped
+    networks:
+      - vtg
+    expose:
+      - "80"
+  vector-tile-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - vtg
+    ports:
+      - "8080:8080"
+    depends_on:
+      - vector-tile-renderer
+networks:
+  vtg:
