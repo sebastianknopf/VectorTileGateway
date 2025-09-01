@@ -1,6 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from io import BytesIO
+from pathlib import Path
 from requests import get, post
 from requests import Response as HttpResponse
 
@@ -9,11 +12,22 @@ import memcache
 import transform
 import version
 
-app = FastAPI()
+static_path: str = Path(__file__).parent.parent / 'resources' / 'static'
+tmpl_path: str = Path(__file__).parent.parent / 'resources' / 'html'
+
+app: FastAPI = FastAPI()
+app.mount('/static', StaticFiles(directory=static_path), name='static')
+
+tmpl: Jinja2Templates = Jinja2Templates(directory=tmpl_path)
 
 @app.get('/')
-async def index():
-    return {"message": "Vector Tile Gateway"}
+async def index(request: Request, s: str = None):
+    return tmpl.TemplateResponse('index.html', {
+        'request': request,
+        'version': version.__version__,
+        'style': s,
+        'baseurl': request.base_url
+    })
 
 @app.get('/tile/{zoom}/{x}/{y}.png')
 async def tile(zoom: int, x: int, y: int, style: str, width: int = 256, height: int = 256):

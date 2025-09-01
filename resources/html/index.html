@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>VectorTileGateway</title>
+        <link rel="stylesheet" type="text/css" href="/static/w3/w3.css">
+        <link rel="stylesheet" type="text/css" href="/static/leaflet/leaflet.css">
+        <style>
+            .w3c-wrapper {
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <main class="w3-main">
+            <div class="w3-container">
+                <h2 class="w3-center">VectorTileGateway</h2>
+            </div>
+            <div class="w3-container w3c-wrapper">
+                <h3><b>About VectorTileGateway</b></h3>
+                <p>VectorTileGateway is a lightweight Dockerized service to render MapLibre/Mapbox vector tiles on demand and serve them as PNG images. Ideal for testing styles, generating raster tiles for clients without vector support, or building a custom vector tile proxy.</p>
+                <p>Whenever you fetch a slippy map tile (Z/X/Y.png), VectorTileGateway will load the vector tile and apply the style to generate the corresponding PNG tile. Caching mechanisms are used for performance issues. Every request is cached for 10 minutes.</p>
+            </div>
+            <div class="w3-container w3c-wrapper">
+                <h3><b>Quick Start</b></h3>
+                <form class="w3-form">
+                    <div class="w3-row">
+                        <div class="w3-col" style="width:90%;">
+                            <input id="edt-style-url" type="text" class="w3-input w3-border" placeholder="Enter MapLibre/Mapbox Style URL here..." value="{{ style | default('') }}"/>
+                        </div>
+                        <div class="w3-rest w3-center">
+                            <input type="submit" class="w3-button w3-green" value="Go!" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="div-result" class="w3-container w3c-wrapper" style="display:none;">
+                <p>Use this URL for your slippy map client:</p>
+                <div class="w3-container w3-padding w3-light-gray">
+                    <code id="code-result"></code>
+                </div>
+            </div>
+            <div id="div-preview" class="w3-container w3c-wrapper" style="display:none;">
+                <h3><b>Preview</b></h3>
+                <p>Congrats! See this little map preview pointing to Keltern-Weiler - This is where VectorTileGateway was built!</p>
+                <div id="map" style="height: 400px;"></div>
+            </div>
+            <div class="w3-container w3c-wrapper">
+                <h3><b>Documentation</b></h3>
+                <p>See the full documentation on <a href="https://github.com/sebastianknopf/VectorTileGateway" target="_blank">GitHub</a>.</p>
+            </div>
+            <div class="w3-container w3-margin-top w3-margin-bottom w3c-wrapper">
+                <div class="w3-center">
+                    <h3><b>Get in Touch</b></h3>
+                    <a href="https://github.com/sebastianknopf/" target="_blank" class="w3-margin">
+                        <img src="/static/img/github.png" width="50" height="50" />
+                    </a>
+                    <a href="https://www.linkedin.com/in/sebastian-knopf-9763791ab/" target="_blank" class="w3-margin">
+                        <img src="/static/img/linkedin.png" width="50" height="50" />
+                    </a>
+                </div>
+            </div>
+        </main>
+        <script type="text/javascript" src="/static/leaflet/leaflet.js"></script>
+        <script type="text/javascript">
+            function updateUrlAndPreview() {
+                const divResult = document.getElementById('div-result');
+                const codeResult = document.getElementById('code-result');
+                const divPreview = document.getElementById('div-preview');
+                
+                const styleUrl = form.querySelector('input[id="edt-style-url"]').value;
+                if (styleUrl) {
+                    let zxyUrl = `{{ baseurl }}tile/{z}/{x}/{y}.png?style=${encodeURIComponent(styleUrl)}`;
+
+                    codeResult.textContent = zxyUrl;
+                    divResult.style.display = 'block';
+
+                    divPreview.style.display = 'block';
+
+                    let map = L.map('map').setView([48.88573, 8.54362], 15);
+                    L.tileLayer(zxyUrl, {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }).addTo(map);
+                }
+            }
+
+            const form = document.querySelector('form');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                updateUrlAndPreview();
+            });
+
+            {% if style %}
+            updateUrlAndPreview();
+            {% endif %}
+        </script>
+    </body>
+</html>

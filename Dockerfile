@@ -13,6 +13,8 @@ RUN pip install --no-cache-dir .
 COPY src/ /app/src
 RUN pip install --no-deps .
 
+COPY resources/ /app/resources
+
 EXPOSE 8080
 
 ENTRYPOINT ["python"]
