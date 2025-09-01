@@ -4,6 +4,7 @@ Ideal for testing styles, generating raster tiles for clients without vector sup
 
 - Accepts Z/X/Y tile requests via [FastAPI](https://github.com/fastapi/fastapi).
 - Uses [mbgl-renderer](https://github.com/consbio/mbgl-renderer) to render tiles according to your MapLibre (former: Mapbox) style.
+- Caches loaded styles and tiles using a [memcached](https://github.com/memcached/memcached) instance.
 - Returns rendered tiles directly to the client as PNG using an [uvicorn](https://github.com/encode/uvicorn) server.
 - Handles multiple requests in parallel and can be deployed easily with Docker Compose.
 
