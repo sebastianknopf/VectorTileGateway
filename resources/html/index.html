@@ -9,6 +9,24 @@
                 max-width: 1000px;
                 margin: 0 auto;
             }
+
+            .w3c-nowrap {
+                /* These are technically the same, but use both */
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+
+                -ms-word-break: break-all;
+                /* This is the dangerous one in WebKit, as it breaks things wherever */
+                word-break: break-all;
+                /* Instead use this non-standard one: */
+                word-break: break-word;
+
+                /* Adds a hyphen where the word breaks, if supported (No Blink) */
+                -ms-hyphens: auto;
+                -moz-hyphens: auto;
+                -webkit-hyphens: auto;
+                hyphens: auto;
+            }
         </style>
     </head>
     <body>
@@ -40,7 +58,16 @@
             <div id="div-result" class="w3-container w3c-wrapper" style="display:none;">
                 <p>Use this URL for your slippy map client:</p>
                 <div class="w3-container w3-padding w3-light-gray">
-                    <code id="code-result"></code>
+                    <div class="w3-row">
+                        <div class="w3-col" style="width:95%">
+                            <code id="code-result" class="w3c-nowrap"></code>
+                        </div>
+                        <div class="w3-rest w3-right" style="padding-top:4px;">
+                            <a id="a-copy-clipboard" href="#" title="copy to clipboard">
+                                <img src="/static/img/clipboard.png" width="24" height="24" />
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="div-preview" class="w3-container w3c-wrapper" style="display:none;">
@@ -66,6 +93,8 @@
         </main>
         <script type="text/javascript" src="/static/leaflet/leaflet.js"></script>
         <script type="text/javascript">
+            let zxyUrl = null;
+            
             function updateUrlAndPreview() {
                 const divResult = document.getElementById('div-result');
                 const codeResult = document.getElementById('code-result');
@@ -73,7 +102,7 @@
                 
                 const styleUrl = form.querySelector('input[id="edt-style-url"]').value;
                 if (styleUrl) {
-                    let zxyUrl = `{{ baseurl }}tile/{z}/{x}/{y}.png?style=${encodeURIComponent(styleUrl)}`;
+                    zxyUrl = `{{ baseurl }}tile/{z}/{x}/{y}.png?style=${encodeURIComponent(styleUrl)}`;
                     {%if token is not none %}
                     zxyUrl += `&token={{ token }}`;
                     {% endif %}
@@ -95,6 +124,15 @@
             form.addEventListener('submit', (event) => {
                 event.preventDefault();
                 updateUrlAndPreview();
+            });
+
+            const link = document.querySelector('a[id="a-copy-clipboard"]');
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+
+                if (zxyUrl != null) {
+                    navigator.clipboard.writeText(zxyUrl);
+                }
             });
 
             {% if style %}
