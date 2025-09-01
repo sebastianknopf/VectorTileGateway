@@ -9,6 +9,7 @@ from requests import Response as HttpResponse
 
 import json
 import memcache
+import os
 import transform
 import version
 
@@ -21,17 +22,39 @@ app.mount('/static', StaticFiles(directory=static_path), name='static')
 tmpl: Jinja2Templates = Jinja2Templates(directory=tmpl_path)
 
 @app.get('/')
-async def index(request: Request, s: str = None):
+async def index(request: Request, style: str = None, token: str = None):
+
+    env_token: str = os.getenv('VTG_TOKEN', None)
+    if env_token is not None:
+        if env_token != token:
+            return JSONResponse(
+                status_code=401, 
+                content={
+                    'error': 'Invalid access token!'
+                }
+            )
+
     return tmpl.TemplateResponse('index.html', {
         'request': request,
         'version': version.__version__,
-        'style': s,
+        'style': style,
+        'token': token,
         'baseurl': request.base_url
     })
 
 @app.get('/tile/{zoom}/{x}/{y}.png')
-async def tile(zoom: int, x: int, y: int, style: str, width: int = 256, height: int = 256):
+async def tile(zoom: int, x: int, y: int, style: str, token: str = None, width: int = 256, height: int = 256):
 
+    env_token: str = os.getenv('VTG_TOKEN', None)
+    if env_token is not None:
+        if env_token != token:
+            return JSONResponse(
+                status_code=401, 
+                content={
+                    'error': 'Invalid access token!'
+                }
+            )
+    
     try:
 
         # define HTTP helpers

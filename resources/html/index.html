@@ -74,6 +74,9 @@
                 const styleUrl = form.querySelector('input[id="edt-style-url"]').value;
                 if (styleUrl) {
                     let zxyUrl = `{{ baseurl }}tile/{z}/{x}/{y}.png?style=${encodeURIComponent(styleUrl)}`;
+                    {%if token is not none %}
+                    zxyUrl += `&token={{ token }}`;
+                    {% endif %}
 
                     codeResult.textContent = zxyUrl;
                     divResult.style.display = 'block';
