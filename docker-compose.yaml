@@ -22,7 +22,7 @@ services:
     networks:
       - vtg
     ports:
-      - "8080:8080"
+      - "${VTG_PORT:-8080}:8080"
     depends_on:
       - vector-tile-renderer
       - vector-tile-cache

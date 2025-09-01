@@ -18,4 +18,4 @@ COPY resources/ /app/resources
 EXPOSE 8080
 
 ENTRYPOINT ["python"]
-CMD ["-m", "uvicorn", "src.api:app", "--port", "8080", "--host", "0.0.0.0"]
+CMD ["-m", "uvicorn", "src.api:app", "--port", "8080", "--proxy-headers", "--forwarded-allow-ips=*", "--host", "0.0.0.0"]
